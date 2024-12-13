@@ -7,6 +7,7 @@ public class Client extends User implements Serializable {
     // fields
     private String currentUserName;
     private ArrayList<Account> accounts = new ArrayList<>();
+    private final ArrayList<Transaction> transactions = new ArrayList<>();
     private boolean active;
     private boolean accepted;
     private float totalBalance;
@@ -27,6 +28,18 @@ public class Client extends User implements Serializable {
     }
 
     // methods
+
+    private String generateTransactionID() {
+        return "TXN"+ System.currentTimeMillis();
+    }//generate unique ID for every transaction
+
+    public void logTransaction(Transaction transaction) {
+        transactions.add(transaction);}//saves every transaction in transactions array list
+
+    public ArrayList<Transaction> getTransactions() {
+        return transactions;
+    }
+
     public void addAccount(Account account) {
         accounts.add(account);
     }
@@ -71,22 +84,29 @@ public class Client extends User implements Serializable {
     public static void sendRegistration(Client client) {
         Employee.requestRegistration(client);
     }
+
     public void sendCardRequest(String pin ) {
         Employee.requestCard(getAccount().getAccountNumber(), pin);
     }
-    public  boolean transferMoney(String accountNumber, float amount){
+
+    public  boolean transferMoney(String accountNumber, float amount,String recipientAccountNumber){
+        logTransaction(new Transaction(generateTransactionID(), new Date(), amount, "Transfer", this.accountNumber, recipientAccountNumber));
         return Employee.transferAccepted(getAccount().getAccountNumber(), accountNumber, amount);
     }
+
     public void addLoyaltyPoints (int points){
         loyaltyPoints += points;
     }
+
     public void addMoneyToCredit( float amount) {
         if(getAccount().hasCreditCard()) {
+            logTransaction(new Transaction(generateTransactionID(), new Date(), amount, "CreditDeposit", this.accountNumber, null));
             getAccount().returnCreditCard().updateBalance(amount);
         }
     }
     public void payWithCredit(float amount) {
         if(getAccount().hasCreditCard() && getCard().getBalance() >= amount) {
+            logTransaction(new Transaction(generateTransactionID(), new Date(), amount, "CreditPayment", this.accountNumber, null));
             getAccount().returnCreditCard().updateBalance(-amount);
             addLoyaltyPoints(1);
         }
@@ -94,6 +114,7 @@ public class Client extends User implements Serializable {
     public String getAccountNumber() {
         return getAccount().getAccountNumber();
     }
+
     public float getTotalBalance() {
         float totalBalance = 0F;
         for(Account account : accounts) {

@@ -13,9 +13,10 @@ public class Transaction {
     private TransactionType type;
     private String clientSSN;
     private int employeeID;
+    private String recipientAccountNumber;
 
     // parametrised constructor
-    public Transaction(String transactionID, LocalDate date, double amount, TransactionType type, String clientSSN, int employeeID) {
+    public Transaction(String transactionID, LocalDate date, double amount, TransactionType type, String clientSSN, String recipientAccountNumber) {
         this.transactionID = transactionID;
         this.date =  date;
         this.amount = amount;
